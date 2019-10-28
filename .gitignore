@@ -1,0 +1,6 @@
+*.pyc
+viz/*
+snapshots/*
+runs
+__pycache__
+*.png
