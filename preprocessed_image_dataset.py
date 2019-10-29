@@ -64,7 +64,7 @@ class ImageDataset(torch_data.Dataset):
             gt_patch=gt_image
 
         input_patch_1 = np.minimum(input_patch_1, 1.0)
-        input_patch_2 = np.minimum(input_patch_1, 1.0)
+        input_patch_2 = np.minimum(input_patch_2, 1.0)
         gt_patch = np.minimum(gt_patch, 1.0)
 
         # random flip and transpose

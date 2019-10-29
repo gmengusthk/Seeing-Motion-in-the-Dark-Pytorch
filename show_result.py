@@ -14,7 +14,7 @@ def array_2_cv(array):
     array_numpy=array.numpy()
     array_numpy=array_numpy.transpose(1,2,0)
     array_numpy=np.clip(array_numpy*255.0,0,255)
-    array_numpy = array_numpy[:,:,[2,1,0]]
+    # array_numpy = array_numpy[:,:,[2,1,0]]
     array_numpy=np.uint8(array_numpy)
     return array_numpy
 
@@ -34,7 +34,7 @@ if __name__=='__main__':
     device=torch.device("cuda" if use_cuda else "cpu")
     print('device:',device)
 
-    dataset=ImageDataset(cfg.input_dir,cfg.gt_dir,crop_size=512,phase='test')
+    dataset=ImageDataset(cfg.input_dir,cfg.gt_dir,crop_size=768,phase='test')
 
     data_loader = torch.utils.data.DataLoader(dataset,
                                             batch_size=1, shuffle=False,

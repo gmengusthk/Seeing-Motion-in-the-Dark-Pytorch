@@ -4,3 +4,4 @@ snapshots/*
 runs
 __pycache__
 *.png
+.vscode
