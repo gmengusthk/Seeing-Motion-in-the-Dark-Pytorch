@@ -3,8 +3,9 @@ import torch.optim as optim
 import torch.nn as nn
 from network import SeeMotionInDarkNet
 from preprocessed_image_dataset import ImageDataset
+from raw_image_dataset import ImageDatasetRaw
 from vgg import VGG19_Extractor
-import cfg as cfg
+import cfg_raw as cfg
 import os
 
 from torch.utils.tensorboard import SummaryWriter
@@ -31,7 +32,10 @@ def train(unet_model, vgg_model, device, train_loader, loss_function, optimizer,
         loss_c_2=loss_function(output_1_vgg_2,output_2_vgg_2)
         loss_c_3=loss_function(output_1_vgg_3,output_2_vgg_3)
         loss_c_4=loss_function(output_1_vgg_4,output_2_vgg_4)
-        loss=loss_gt_1+loss_gt_2+loss_c_0+loss_c_1+loss_c_2+loss_c_3+loss_c_4
+
+        loss_c=loss_c_0+loss_c_1+loss_c_2+loss_c_3+loss_c_4
+
+        loss=loss_gt_1+loss_gt_2+loss_c
 
         optimizer.zero_grad()
         loss.backward()
@@ -41,6 +45,10 @@ def train(unet_model, vgg_model, device, train_loader, loss_function, optimizer,
         sample_cnt+=1
 
         tb_writer.add_scalar('Loss/loss', loss, (epoch-1)*len(train_loader)+batch_idx)
+        tb_writer.add_scalar('Loss/gt_1', loss_gt_1, (epoch-1)*len(train_loader)+batch_idx)
+        tb_writer.add_scalar('Loss/gt_2', loss_gt_2, (epoch-1)*len(train_loader)+batch_idx)
+        tb_writer.add_scalar('Loss/loss_c_0', loss_c_0, (epoch-1)*len(train_loader)+batch_idx)
+        tb_writer.add_scalar('Loss/loss_c', loss_c, (epoch-1)*len(train_loader)+batch_idx)
 
         if (batch_idx+1) % cfg.log_interval == 0:
             loss_avg=loss_acc/sample_cnt
@@ -64,14 +72,15 @@ if __name__=='__main__':
     device=torch.device("cuda" if use_cuda else "cpu")
     print('device:',device)
 
-    train_dataset=ImageDataset(cfg.input_dir,cfg.gt_dir,crop_size=cfg.train_crop_size,phase='train')
+    # train_dataset=ImageDataset(cfg.input_dir,cfg.gt_dir,crop_size=cfg.train_crop_size,phase='train')
+    train_dataset=ImageDatasetRaw(cfg.input_dir,cfg.gt_dir,crop_size=cfg.train_crop_size,phase='train')
 
     train_loader = torch.utils.data.DataLoader(train_dataset,
                                             batch_size=cfg.train_batch_size, shuffle=True,
                                             num_workers=cfg.data_loader_num_workers, pin_memory=True)
 
 
-    unet_model=SeeMotionInDarkNet(input_channels=3,demosaic=False)
+    unet_model=SeeMotionInDarkNet(input_channels=cfg.input_channels,demosaic=cfg.demosaic)
     vgg_model=VGG19_Extractor(output_layer_list=cfg.vgg_output_layer_list)
     unet_model=unet_model.to(device)
     vgg_model=vgg_model.to(device)
@@ -87,7 +96,7 @@ if __name__=='__main__':
     # optimizer=optim.SGD(model.parameters(), lr=cfg.base_lr, momentum=cfg.momentum)
     optimizer=optim.Adam(unet_model.parameters(), lr=cfg.base_lr)
 
-    tb_writer = SummaryWriter()
+    tb_writer = SummaryWriter(log_dir=cfg.log_dir)
 
     print('training start!')
     for epoch in range(cfg.start_epoch, cfg.total_epochs + 1):

@@ -1,7 +1,9 @@
 *.pyc
 viz/*
 snapshots/*
+snapshots_raw/*
 runs
 __pycache__
 *.png
 .vscode
+logs
