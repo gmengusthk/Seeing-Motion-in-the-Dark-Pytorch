@@ -9,13 +9,13 @@ train_crop_size=256
 
 #train config
 input_channels=3
-seed=0
+seed=32
 train_batch_size=8
 data_loader_num_workers=4
 base_lr=1e-4
 momentum=0.9
-total_epochs=6000
-lr_decay_epochs=[1000,2000,4000]
+total_epochs=2000
+lr_decay_epochs=[500,1000,1500]
 lr_decay_rate=0.1
 model_save_interval=50
 model_save_path='./snapshots_preprocessed'
@@ -31,7 +31,7 @@ log_dir=os.path.join('logs/runs_preprocessed','-'.join(time_str.split()[1:-1]))
 
 demosaic=False
 
-start_epoch=1
+start_epoch=551
 for epoch in lr_decay_epochs:
     if epoch<=start_epoch:
         base_lr*=lr_decay_rate

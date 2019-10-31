@@ -95,6 +95,70 @@ class ImageDataset(torch_data.Dataset):
 
 
 
+class ImageDatasetTest(torch_data.Dataset):
+    def __init__(self,input_dir,gt_dir,crop_size=256,phase='train'):
+        super(ImageDatasetTest).__init__()
+
+        self.input_dir=input_dir
+        self.gt_dir=gt_dir
+        self.phase=phase
+        self.crop_size=crop_size
+
+        if self.phase=='train':
+            sample_path_list=glob.glob(os.path.join(gt_dir,'0*'))
+        else:
+            sample_path_list=glob.glob(os.path.join(gt_dir,'M*'))
+        
+        self.sample_id_list=sorted([os.path.basename(sample_id) for sample_id in sample_path_list])
+       
+    def __getitem__(self,index):
+
+        sample_id=self.sample_id_list[index]
+        in_path_list=glob.glob(os.path.join(self.input_dir,sample_id,'*.png'))
+        in_path_list=sorted(in_path_list)
+
+        input_patch_torch_list=[]
+        for in_path in in_path_list:
+            in_image=cv2.imread(in_path,cv2.IMREAD_UNCHANGED).transpose(2,0,1)
+            in_image=np.float32(in_image)/65535.0
+        
+            # crop
+            if self.crop_size>0:
+                input_patch=in_image[:, 0:self.crop_size, 0:self.crop_size]
+            else:
+                input_patch=in_image
+
+            input_patch = np.minimum(input_patch, 1.0)
+            input_patch=np.ascontiguousarray(input_patch)
+            input_patch_torch=torch.from_numpy(input_patch)
+            input_patch_torch_list.append(input_patch_torch)
+
+
+        gt_path_list=glob.glob(os.path.join(self.gt_dir,sample_id,'half0001*.png'))
+        if len(gt_path_list)>0:
+            gt_path=gt_path_list[0]
+        else:
+            gt_path=in_path
+
+        gt_image=cv2.imread(gt_path,cv2.IMREAD_UNCHANGED).transpose(2,0,1)
+        gt_image=np.float32(gt_image)/65535.0
+
+        if self.crop_size>0:
+            gt_patch=gt_image[:, 0:self.crop_size, 0:self.crop_size]
+        else:
+            gt_patch=gt_image
+        
+        gt_patch = np.minimum(gt_patch, 1.0)
+        gt_patch=np.ascontiguousarray(gt_patch)
+        gt_patch_torch=torch.from_numpy(gt_patch)
+
+        return input_patch_torch_list, gt_patch_torch
+
+    def __len__(self):
+        return len(self.sample_id_list)
+
+
+
 
 if __name__=='__main__':
 

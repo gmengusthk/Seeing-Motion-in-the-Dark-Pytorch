@@ -2,7 +2,7 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 from network import SeeMotionInDarkNet
-from preprocessed_image_dataset import ImageDataset
+from preprocessed_image_dataset import ImageDataset,ImageDatasetTest
 # from raw_image_dataset import ImageDatasetRaw as ImageDataset
 import cfg_preprocessed as cfg
 # import cfg_raw as cfg
@@ -36,12 +36,7 @@ if __name__=='__main__':
     device=torch.device("cuda" if use_cuda else "cpu")
     print('device:',device)
 
-    dataset=ImageDataset(cfg.input_dir,cfg.gt_dir,crop_size=768,phase='test')
-
-    data_loader = torch.utils.data.DataLoader(dataset,
-                                            batch_size=1, shuffle=False,
-                                            num_workers=1, pin_memory=True)
-
+    dataset=ImageDatasetTest(cfg.input_dir,cfg.gt_dir,crop_size=912,phase='test')
 
     model = SeeMotionInDarkNet(input_channels=3,demosaic=False)
     model=model.to(device)
@@ -54,35 +49,23 @@ if __name__=='__main__':
 
     model.eval()
 
-    for batch_idx, (data_1,data_2,target) in enumerate(data_loader):
-        data_1,data_2=data_1.to(device),data_2.to(device)
-        if target is not None:
-            target=target.to(device)
+    for data_idx in range(len(dataset)):
+        data_list,target=dataset[data_idx]
+        
+        target_frame_cv=array_2_cv(target)
+        target_write_path=os.path.join(image_write_dir,'image_%03d_gt.png'%(data_idx))
+        cv2.imwrite(target_write_path,target_frame_cv)
+        print(target_write_path)
 
-        output_1=model(data_1)
-        output_2=model(data_2)
-        batch_size=output_1.size(0)
-        for b_idx in range(batch_size):
-            output_1_frame_cpu=output_1[b_idx].cpu().data
-            output_2_frame_cpu=output_2[b_idx].cpu().data
-
-            output_1_frame_cv=array_2_cv(output_1_frame_cpu)
-            output_2_frame_cv=array_2_cv(output_2_frame_cpu)
-
-            output_1_write_path=os.path.join(image_write_dir,'image_%03d_%2d_output_%05d_1.png'%(batch_idx,b_idx,args.epoch))
-            output_2_write_path=os.path.join(image_write_dir,'image_%03d_%2d_output_%05d_2.png'%(batch_idx,b_idx,args.epoch))
-            cv2.imwrite(output_1_write_path,output_1_frame_cv)
-            cv2.imwrite(output_2_write_path,output_2_frame_cv)
-            print(output_1_write_path)
-            print(output_2_write_path)
-
-            if target is not None:
-                target_frame_cpu=target[b_idx].cpu().data
-                target_frame_cv=array_2_cv(target_frame_cpu)
-                target_write_path=os.path.join(image_write_dir,'image_%03d_%2d_gt.png'%(batch_idx,b_idx))
-                cv2.imwrite(target_write_path,target_frame_cv)
-                print(target_write_path)
-            else:
-                print('%d %d No GT!'%(batch_idx,b_idx))
+        for idx in range(len(data_list)):
+            data=data_list[idx].unsqueeze(0)
+            data=data.to(device)
             
-            print('-'*50)
+            output=model(data)
+            output_frame_cpu=output[0].cpu().data
+            output_frame_cv=array_2_cv(output_frame_cpu)
+            output_write_path=os.path.join(image_write_dir,'image_%03d_output_%05d.png'%(data_idx,idx))
+            cv2.imwrite(output_write_path,output_frame_cv)
+            print(output_write_path)
+        
+        print('-'*50)
