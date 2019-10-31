@@ -3,7 +3,7 @@ import torch.optim as optim
 import torch.nn as nn
 from network import SeeMotionInDarkNet
 from preprocessed_image_dataset import ImageDataset
-from raw_image_dataset import ImageDatasetRaw
+# from raw_image_dataset import ImageDatasetRaw as ImageDataset
 from vgg import VGG19_Extractor
 # import cfg_raw as cfg
 import cfg_preprocessed as cfg
@@ -36,7 +36,7 @@ def train(unet_model, vgg_model, device, train_loader, loss_function, optimizer,
 
         loss_c=loss_c_0+loss_c_1+loss_c_2+loss_c_3+loss_c_4
 
-        loss=loss_gt_1+loss_gt_2+loss_c
+        loss=loss_gt_1+loss_gt_2+cfg.loss_c_ratio*loss_c
 
         optimizer.zero_grad()
         loss.backward()

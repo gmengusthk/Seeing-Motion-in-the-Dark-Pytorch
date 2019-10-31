@@ -20,6 +20,7 @@ lr_decay_rate=0.1
 model_save_interval=50
 model_save_path='./snapshots_preprocessed'
 vgg_output_layer_list=[3,8,17,26]
+loss_c_ratio=0.05
 
 if not os.path.exists(model_save_path):
     os.mkdir(model_save_path)

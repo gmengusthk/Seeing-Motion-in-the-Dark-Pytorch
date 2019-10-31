@@ -3,6 +3,7 @@ import torch.optim as optim
 import torch.nn as nn
 from network import SeeMotionInDarkNet
 from preprocessed_image_dataset import ImageDataset
+# from raw_image_dataset import ImageDatasetRaw as ImageDataset
 import cfg_preprocessed as cfg
 # import cfg_raw as cfg
 import os
@@ -45,7 +46,7 @@ if __name__=='__main__':
     model = SeeMotionInDarkNet(input_channels=3,demosaic=False)
     model=model.to(device)
 
-    snapshot_path='./snapshots/model_%05d.pth'%(args.epoch)
+    snapshot_path=os.path.join(cfg.model_save_path,'model_%05d.pth'%(args.epoch))
     print('test with %s'%(snapshot_path))
     model.load_state_dict(torch.load(snapshot_path))
 
