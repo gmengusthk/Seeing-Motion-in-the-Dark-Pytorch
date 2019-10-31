@@ -3,7 +3,8 @@ import torch.optim as optim
 import torch.nn as nn
 from network import SeeMotionInDarkNet
 from preprocessed_image_dataset import ImageDataset
-import cfg
+import cfg_preprocessed as cfg
+# import cfg_raw as cfg
 import os
 import cv2
 import argparse

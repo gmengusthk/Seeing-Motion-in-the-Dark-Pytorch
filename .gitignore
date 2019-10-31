@@ -2,8 +2,9 @@
 viz/*
 snapshots/*
 snapshots_raw/*
+snapshots_preprocessed/*
 runs
 __pycache__
 *.png
 .vscode
-logs
+logs/*

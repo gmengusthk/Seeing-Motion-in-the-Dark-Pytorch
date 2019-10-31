@@ -42,7 +42,6 @@ class ImageDataset(torch_data.Dataset):
         gt_image=cv2.imread(gt_path,cv2.IMREAD_UNCHANGED).transpose(2,0,1)
         gt_image=np.float32(gt_image)/65535.0
         
-        
         # crop
         if self.crop_size>0:
             H,W=in_image_1.shape[1:3]

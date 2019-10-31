@@ -5,7 +5,8 @@ from network import SeeMotionInDarkNet
 from preprocessed_image_dataset import ImageDataset
 from raw_image_dataset import ImageDatasetRaw
 from vgg import VGG19_Extractor
-import cfg_raw as cfg
+# import cfg_raw as cfg
+import cfg_preprocessed as cfg
 import os
 
 from torch.utils.tensorboard import SummaryWriter
@@ -72,8 +73,8 @@ if __name__=='__main__':
     device=torch.device("cuda" if use_cuda else "cpu")
     print('device:',device)
 
-    # train_dataset=ImageDataset(cfg.input_dir,cfg.gt_dir,crop_size=cfg.train_crop_size,phase='train')
-    train_dataset=ImageDatasetRaw(cfg.input_dir,cfg.gt_dir,crop_size=cfg.train_crop_size,phase='train')
+    train_dataset=ImageDataset(cfg.input_dir,cfg.gt_dir,crop_size=cfg.train_crop_size,phase='train')
+    # train_dataset=ImageDatasetRaw(cfg.input_dir,cfg.gt_dir,crop_size=cfg.train_crop_size,phase='train')
 
     train_loader = torch.utils.data.DataLoader(train_dataset,
                                             batch_size=cfg.train_batch_size, shuffle=True,

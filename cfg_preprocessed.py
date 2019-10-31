@@ -1,4 +1,5 @@
 import os
+import time
 
 #data config
 input_dir = '/media/gtmeng/DataDisk2/Learning-to-See-in-the-Dark-pre-processed/VBM4D_rawRGB'
@@ -17,7 +18,7 @@ total_epochs=6000
 lr_decay_epochs=[1000,2000,4000]
 lr_decay_rate=0.1
 model_save_interval=50
-model_save_path='./snapshots'
+model_save_path='./snapshots_preprocessed'
 vgg_output_layer_list=[3,8,17,26]
 
 if not os.path.exists(model_save_path):
@@ -25,11 +26,11 @@ if not os.path.exists(model_save_path):
 
 log_interval=4
 time_str=time.asctime( time.localtime(time.time()))
-log_dir=os.path.join('logs/runs','-'.join(time_str.split()[1:-1]))
+log_dir=os.path.join('logs/runs_preprocessed','-'.join(time_str.split()[1:-1]))
 
 demosaic=False
 
-start_epoch=2601
+start_epoch=1
 for epoch in lr_decay_epochs:
     if epoch<=start_epoch:
         base_lr*=lr_decay_rate
