@@ -5,6 +5,7 @@ import os
 import numpy as np
 import rawpy
 import cv2
+import exifread
 
 
 def pack_raw(raw):
@@ -42,6 +43,15 @@ def gt_2_cv(gt_tensor):
     gt_tensor_numpy=np.uint8(gt_tensor_numpy)
     return gt_tensor_numpy
 
+def get_exposure_time(raw_path):
+    with open(raw_path,'rb') as raw_f:
+        tags=exifread.process_file(raw_f)
+        exposure_time_ratio=tags['EXIF ExposureTime'].values[0]
+    return (float(exposure_time_ratio.num),float(exposure_time_ratio.den))
+
+def fraction_division(ratio_1,ratio_2):
+    return (ratio_1[0]*ratio_2[1])/(ratio_1[1]*ratio_2[0])
+
 
 class ImageDatasetRaw(torch_data.Dataset):
     def __init__(self,input_dir,gt_dir,crop_size=256,phase='train'):
@@ -76,14 +86,17 @@ class ImageDatasetRaw(torch_data.Dataset):
         gt_im=gt_im.transpose(2,0,1)
         gt_full_size_image=np.float32(gt_im / 65535.0)
 
-        exposure_ratio=np.around(np.mean(gt_full_size_image)/np.mean(input_full_size_image_1))
+        # exposure ratio
+        exposure_time_1=get_exposure_time(in_path_1)
+        exposure_time_2=get_exposure_time(in_path_2)
+        exposure_time_gt=get_exposure_time(gt_path)
 
-        input_full_size_image_1=input_full_size_image_1*exposure_ratio
-        input_full_size_image_2=input_full_size_image_2*exposure_ratio
+        exposure_ratio_1=fraction_division(exposure_time_gt,exposure_time_1)
+        exposure_ratio_2=fraction_division(exposure_time_gt,exposure_time_2)
 
+        input_full_size_image_1=input_full_size_image_1*exposure_ratio_1
+        input_full_size_image_2=input_full_size_image_2*exposure_ratio_2
 
-        
-        
         # crop
         if self.crop_size>0:
             H,W=input_full_size_image_1.shape[1:3]

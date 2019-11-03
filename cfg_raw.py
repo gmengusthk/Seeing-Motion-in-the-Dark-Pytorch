@@ -14,13 +14,13 @@ train_batch_size=4
 data_loader_num_workers=4
 base_lr=1e-4
 momentum=0.9
-total_epochs=6000
-lr_decay_epochs=[1000,2000,4000]
+total_epochs=4000
+lr_decay_epochs=[1000,2000]
 lr_decay_rate=0.1
 model_save_interval=50
 model_save_path='./snapshots_raw'
-vgg_output_layer_list=[3,8,17,26]
-loss_c_ratio=0.05
+vgg_output_layer_list=[2,7,16,25]
+loss_c_ratio=0.1
 
 if not os.path.exists(model_save_path):
     os.mkdir(model_save_path)
